@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STRECITY – Layer Data Sources</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #343a40;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Layer Data Sources</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Subsystem</th>
+        <th>Factor</th>
+        <th>Description</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Physical</td><td>Flood risk category</td><td>Area at flood risk (m²; levels 1–4) per cell</td><td>Municipality</td></tr>
+      <tr><td>Physical</td><td>Building obsolescence</td><td>Share of buildings built before 1990 (% of total buildings in cell)</td><td>Czech Statistical Office</td></tr>
+      <tr><td>Physical</td><td>Elevation</td><td>Average elevation above sea level (m) per cell</td><td>Czech Office for Surveying, Mapping and Cadastre</td></tr>
+      <tr><td>Physical</td><td>Building height</td><td>Average building height (m) per cell</td><td>Municipality</td></tr>
+      <tr><td>Physical</td><td>Landcover type</td><td>Dominant land cover type per cell</td><td>Municipality; Copernicus</td></tr>
+      <tr><td>Physical</td><td>Light pollution</td><td>Share of illuminated area (% of total cell area; from night aerial imagery)</td><td>Municipality; TopGis; Technical Network Brno; Brno Observatory and Planetarium</td></tr>
+      <tr><td>Physical</td><td>Air pollution</td><td>Five-year average concentration of PM2.5, PM10, and NO₂; detailed city model for PM10 (mean per cell)</td><td>Municipality; Czech Hydrometeorological Institute</td></tr>
+      <tr><td>Physical</td><td>Noise pollution</td><td>Average daytime noise level per cell</td><td>Municipality; Ministry of Health</td></tr>
+      <tr><td>Physical</td><td>Count of dwellings</td><td>Number of occupied dwellings per cell</td><td>Czech Statistical Office</td></tr>
+      <tr><td>Physical</td><td>Dwellings built in specified era</td><td>Number of dwellings in buildings constructed in 1919 or earlier, or from 1920–2011 per cell</td><td>Brno Urban Grid; Czech Statistical Office</td></tr>
+      <tr><td>Physical</td><td>Park greenery area</td><td>Total area of public parks and green spaces (m²) per cell</td><td>Municipality</td></tr>
+      <tr><td>Physical</td><td>Green areas</td><td>Share of green spaces (% of total area; including trees, grasslands, sparse vegetation)</td><td>European Space Agency</td></tr>
+      <tr><td>Physical</td><td>Potholes</td><td>Number of reported pothole issues (from participatory tool "Brňáci pro Brno") per cell</td><td>The Brno Communications Company</td></tr>
+      <tr><td>Physical</td><td>Surface temperature</td><td>Average surface temperature (°C) per cell</td><td>Landsat; Municipality</td></tr>
+
+      <tr><td>Functional</td><td>Public transport</td><td>Minimum average travel time to Brno city center by public transport per cell</td><td>Brno Urban Grid; OpenStreetMap; KORDIS JMK</td></tr>
+      <tr><td>Functional</td><td>Traffic accidents</td><td>Number of pedestrian-related traffic accidents per cell</td><td>Police of the Czech Republic</td></tr>
+      <tr><td>Functional</td><td>Street issues</td><td>Number of reported street issues (all types from participatory tool "Brňáci pro Brno") per cell</td><td>The Brno Communications Company</td></tr>
+      <tr><td>Functional</td><td>Land use area</td><td>Area (m²) of brownfields, industrial/agricultural, and residential buildings in cell</td><td>Municipality; The Brno City Architect's Office; Czech Office for Surveying, Mapping and Cadastre</td></tr>
+      <tr><td>Functional</td><td>Building category</td><td>Number of inhabited flats (in apartments/family houses) and retail/service units per cell</td><td>The Brno City Architect's Office; Czech Statistical Office</td></tr>
+      <tr><td>Functional</td><td>Traffic intensity</td><td>Average vehicle traffic intensity on streets per cell</td><td>Municipality</td></tr>
+      <tr><td>Functional</td><td>Unhealthy food outlets</td><td>Number of fast food restaurants per cell</td><td>OpenStreetMap</td></tr>
+
+      <tr><td>Social</td><td>Care of elder population</td><td>Number of retirement homes per cell</td><td>Own POI mapping</td></tr>
+      <tr><td>Social</td><td>Dwelling index</td><td>Average number of occupants per unit floor area (building area × floors)</td><td>Czech Statistical Office</td></tr>
+      <tr><td>Social</td><td>Education</td><td>Number of people by education level categories per cell</td><td>Czech Statistical Office</td></tr>
+      <tr><td>Social</td><td>Employment</td><td>Number of people by economic activity status per cell</td><td>Czech Statistical Office</td></tr>
+      <tr><td>Social</td><td>Population density</td><td>Population density (persons per m²) per cell</td><td>Brno Urban Grid; Czech Statistical Office</td></tr>
+      <tr><td>Social</td><td>Public safety</td><td>Number of reported law transgressions per cell</td><td>Brno Urban Grid; Brno City Police</td></tr>
+      <tr><td>Social</td><td>Residents</td><td>Number of permanent or long-term residents per cell</td><td>Municipality; Czech Statistical Office</td></tr>
+      <tr><td>Social</td><td>Usual residents</td><td>Number of usual residents per cell</td><td>Brno Urban Grid; Czech Statistical Office</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
