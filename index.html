@@ -50,12 +50,12 @@
     margin: 0;
   }
 
-  /* 📱 Skrytý ovládací panel */
+  /* 📱 Hidden control panel */
   .leaflet-control.collapsed {
     display: none !important;
   }
 
-  /* ☰ tlačítko fixně vpravo nahoře */
+  /* ☰ Button fixed in top right corner */
   #showPanel {
     position: fixed;
     top: 10px;
@@ -88,7 +88,7 @@ function resizeMapToWindow() {
 window.addEventListener('resize', resizeMapToWindow);
 resizeMapToWindow(); // call immediately after loading
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap | <a href="sources.html">Spatial Data Sources</a> | STRECITY team'
+  attribution: '© OpenStreetMap and <a href="sources.html">Spatial Data Sources</a> | STRECITY team'
 }).addTo(map);
 
 window.addEventListener('resize', resizeMapToWindow);
@@ -98,7 +98,7 @@ const layers = {};
 let legend;
 let districtBorders, unitBorders;
 
-// Definice barevných škál
+// Definition of color scales
 const paletteMap = {
   all: chroma.scale('RdYlGn').mode('lab'),
   f: chroma.scale('BrBG').mode('lab'),
@@ -128,13 +128,13 @@ Object.entries(scoreTypes).forEach(([label, [file, attr, type]]) => {
       const values = data.features.map(f => f.properties[attr]).filter(v => v != null);
       const min = Math.min(...values), max = Math.max(...values), mid = (min + max) / 2;
 
-      // Vyber škálu podle typu skóre
+      // Choose scale based on score type
       let palette = 'RdYlGn'; // default
       if (label.includes("Score F")) palette = 'BrBG';
       else if (label.includes("Score P")) palette = 'PuOr';
       else if (label.includes("Score S")) palette = 'PiYG';
 
-      // Lokální barevná škála pro tuto vrstvu
+      // Local color scale for this layer
       const scale = chroma.scale(palette).mode('lab').domain([max, mid, min]);
 
       const layer = L.geoJSON(data, {
@@ -200,10 +200,10 @@ Object.entries(scoreTypes).forEach(([label, [file, attr, type]]) => {
         }
       });
 
-      // Uložíme vrstvu a její škálu a meze pro legendu
+      // Save layer, scale, and limits for legend
       layers[label] = { layer, scale, min, mid, max };
 
-      // Aktivujeme výchozí vrstvu a zaškrtneme ji v ovládacím panelu
+      // Activate the default layer and check it in the control panel
       if (label === "Grid Score All") {
         switchLayer(label);
         setTimeout(() => {
@@ -214,7 +214,7 @@ Object.entries(scoreTypes).forEach(([label, [file, attr, type]]) => {
     });
 });
 
-// hranice městských částí (černé linie) – neinteraktivní
+// City district boundaries (black lines) – non-interactive
 fetch("entropy_data/entropy_scores_city_districts.geojson")
   .then(res => res.json())
   .then(data => {
@@ -224,7 +224,7 @@ fetch("entropy_data/entropy_scores_city_districts.geojson")
     });
   });
 
-// hranice základních sídelních jednotek – taky neinteraktivní
+// Basic settlement unit boundaries – non-interactive
 fetch("entropy_data/entropy_scores_BSUs.geojson")
   .then(res => res.json())
   .then(data => {
@@ -234,7 +234,7 @@ fetch("entropy_data/entropy_scores_BSUs.geojson")
     });
   });
 
-// ovládací panel
+// Control panel
 const control = L.control({ position: 'topright' });
 control.onAdd = function () {
   const wrapper = L.DomUtil.create('div', 'leaflet-control-wrapper leaflet-control');
@@ -280,7 +280,7 @@ control.onAdd = function () {
 };
 control.addTo(map);
 
-// 📱 Po přidání panelu schovej na mobilu
+// Hide control panel on mobile after it's added
 setTimeout(() => {
   if (window.innerWidth < 768) {
     const panel = document.getElementById('layerControlWrapper');
@@ -297,12 +297,12 @@ showPanelBtn.id = "showPanel";
 showPanelBtn.innerText = "☰";
 document.body.appendChild(showPanelBtn);
 
-// interakce
+// Interaction
 document.addEventListener("change", e => {
   if (e.target.name === "scoreLayer") {
     switchLayer(e.target.value);
 
-    // 📱 Automatické sbalení ovládacího panelu na mobilu
+    // Automatically collapse the control panel on mobile
     if (window.innerWidth < 768) {
 const panel = document.getElementById('layerControlWrapper');
       const button = document.getElementById('showPanel');
@@ -322,7 +322,7 @@ const panel = document.getElementById('layerControlWrapper');
   }
 });
 
-// legenda
+// Legend
 function switchLayer(label) {
   Object.values(layers).forEach(l => map.removeLayer(l.layer));
   if (legend) map.removeControl(legend);
@@ -337,7 +337,7 @@ legend.onAdd = function () {
 
   const hasZero = min <= 0 && max >= 0;
 
-  const legendHeight = window.innerHeight < 500 ? 80 : 120; // Dynamická výška legendy
+  const legendHeight = window.innerHeight < 500 ? 80 : 120; // Dynamic legend height
   const zeroRatio = (0 - min) / (max - min);
   const zeroOffset = (1 - zeroRatio) * legendHeight;
 
@@ -378,7 +378,7 @@ document.addEventListener("click", e => {
     if (panel) panel.classList.remove('collapsed');
   }
 });
-// 📱 Na mobilu rovnou schovat ovládací panel po načtení
+// Collapse control panel on mobile after loading
 window.addEventListener('load', () => {
   if (window.innerWidth < 768) {
     const panel = document.getElementById('layerControlWrapper');
