@@ -20,13 +20,14 @@
     .table-container {
       width: 100%;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 40px;
-      min-width: 600px;
+      min-width: 700px;
     }
 
     th, td {
@@ -49,23 +50,39 @@
       font-size: 13px;
       font-style: italic;
       color: #555;
-      margin-top: -20px;
+      margin-top: -10px;
       margin-bottom: 30px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 20px;
+      }
+
+      th, td {
+        font-size: 12px;
+        padding: 6px 8px;
+      }
+
+      .note {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Spatial Data Sources</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Subsystem</th>
-        <th>Factor</th>
-        <th>Description</th>
-        <th>Source</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Subsystem</th>
+          <th>Factor</th>
+          <th>Description</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
       <tr><td>Physical</td><td>Flood risk category</td><td>Area at flood risk (m²; levels 1–4) per cell</td><td>Municipality</td></tr>
       <tr><td>Physical</td><td>Building obsolescence</td><td>Share of buildings built before 1990 (% of total buildings in cell)</td><td>Czech Statistical Office</td></tr>
       <tr><td>Physical</td><td>Elevation</td><td>Average elevation above sea level (m) per cell</td><td>Czech Office for Surveying, Mapping and Cadastre</td></tr>
@@ -97,11 +114,11 @@
       <tr><td>Social</td><td>Public safety</td><td>Number of reported law transgressions per cell</td><td>Brno Urban Grid; Brno City Police</td></tr>
       <tr><td>Social</td><td>Residents</td><td>Number of permanent or long-term residents per cell</td><td>Municipality; Czech Statistical Office</td></tr>
       <tr><td>Social</td><td>Usual residents</td><td>Number of usual residents per cell</td><td>Brno Urban Grid; Czech Statistical Office</td></tr>
-    </tbody>
-  </table>
-
+      </tbody>
+    </table>
+  </div>
 <p class="note">
-    Administrative unit boundaries are sourced from the <a href="https://vdp.cuzk.gov.cz/vdp/ruian" target="_blank">RÚIAN (Register of Territorial Identification, Addresses and Real Estates)</a> RÚIAN (Register of Territorial Identification, Addresses and Real Estates). The grid structure follows the same system as used in the <a href="https://brnourbangrid.cz/" target="_blank">Brno Urban Grid project</a>.
+    Administrative unit boundaries are sourced from the <a href="https://vdp.cuzk.gov.cz/vdp/ruian" target="_blank">RÚIAN (Register of Territorial Identification, Addresses and Real Estates)</a>. The analytical units—grid cells measuring 250 × 250 metres—are based on the standardized European grid system Grid-ETRS89-LAEA-250M (EPSG: 3035).
   </p>
 </body>
 </html>
