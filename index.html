@@ -171,7 +171,7 @@ Object.entries(scoreTypes).forEach(([label, [file, attr, type]]) => {
           }
 
           else if (type === "district") {
-            popup = `<p class="popup-label"><strong>City district:</strong> ${p.nazev}</p>
+            popup = `<p class="popup-label"><strong>City District:</strong> ${p.nazev}</p>
               <table class="popup-table">
                 <thead><tr><th></th><th>District</th></tr></thead>
                 <tbody>` +
@@ -184,7 +184,7 @@ Object.entries(scoreTypes).forEach(([label, [file, attr, type]]) => {
           }
 
           else if (type === "unit") {
-            popup = `<p class="popup-label"><strong>Settlement unit:</strong> ${p.nazev}</p>
+            popup = `<p class="popup-label"><strong>Settlement Unit:</strong> ${p.nazev}</p>
               <table class="popup-table">
                 <thead><tr><th></th><th>Unit</th></tr></thead>
                 <tbody>` +
@@ -273,8 +273,8 @@ control.onAdd = function () {
   });
 
   wrapper.innerHTML += `<hr style="margin:6px 0;">
-    <label style="display:block;"><input type="checkbox" id="toggleDistricts"> City districts</label>
-    <label style="display:block;"><input type="checkbox" id="toggleUnits"> Basic settlement units</label>`;
+    <label style="display:block;"><input type="checkbox" id="toggleDistricts"> City District Borders</label>
+    <label style="display:block;"><input type="checkbox" id="toggleUnits"> Basic Settlement Unit Borders</label>`;
 
   return wrapper;
 };
