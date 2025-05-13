@@ -86,9 +86,9 @@ function resizeMapToWindow() {
   mapDiv.style.height = `${height}px`;
 }
 window.addEventListener('resize', resizeMapToWindow);
-resizeMapToWindow(); // zavolat i hned po načtení
+resizeMapToWindow(); // call immediately after loading
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap | STRECITY team'
+  attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | <a href="sources.html">Layers data source</a> | STRECITY team'
 }).addTo(map);
 
 window.addEventListener('resize', resizeMapToWindow);
