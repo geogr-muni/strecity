@@ -320,6 +320,33 @@ const panel = document.getElementById('layerControlWrapper');
   if (e.target.id === "toggleUnits") {
     e.target.checked ? unitBorders.addTo(map) : map.removeLayer(unitBorders);
   }
+
+    if (e.target.id === "toggleDistricts") {
+    e.target.checked ? districtBorders.addTo(map) : map.removeLayer(districtBorders);
+    
+    // Collapse on mobile
+    if (window.innerWidth < 768) {
+      const panel = document.getElementById('layerControlWrapper');
+      const button = document.getElementById('showPanel');
+      if (panel && button) {
+        panel.classList.add('collapsed');
+        button.style.display = 'block';
+      }
+    }
+  }
+  if (e.target.id === "toggleUnits") {
+    e.target.checked ? unitBorders.addTo(map) : map.removeLayer(unitBorders);
+
+    // Collapse on mobile
+    if (window.innerWidth < 768) {
+      const panel = document.getElementById('layerControlWrapper');
+      const button = document.getElementById('showPanel');
+      if (panel && button) {
+        panel.classList.add('collapsed');
+        button.style.display = 'block';
+      }
+    }
+  }
 });
 
 // Legend
