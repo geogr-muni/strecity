@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>STRECITY – Urban Entropy Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #map {
+    height: 100%;
+  }
+
+  .legend {
+    background: white;
+    padding: 6px;
+    font-family: Arial;
+    line-height: 1.5;
+  }
+
+  .popup-table {
+    width: 100%;
+    font-family: Arial, sans-serif;
+    border-collapse: collapse;
+    margin-top: 5px;
+  }
+
+  .popup-table th, .popup-table td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .popup-table thead {
+    background-color: #343a40;
+    color: white;
+  }
+
+  .popup-label {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* 📱 Skrytý ovládací panel */
+  .leaflet-control.collapsed {
+    display: none !important;
+  }
+
+  /* ☰ tlačítko fixně vpravo nahoře */
+  #showPanel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    font-size: 22px;
+    background: white;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    display: none;
+  }
+
+#layerControlWrapper.collapsed {
+  display: none !important;
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+const map = L.map('map').setView([49.1951, 16.6068], 12);
+function resizeMapToWindow() {
+  const mapDiv = document.getElementById('map');
+  const height = window.innerHeight;
+  mapDiv.style.height = `${height}px`;
+}
+window.addEventListener('resize', resizeMapToWindow);
+resizeMapToWindow(); // zavolat i hned po načtení
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap | STRECITY team'
+}).addTo(map);
+
+window.addEventListener('resize', resizeMapToWindow);
+resizeMapToWindow();
+
+const layers = {};
+let legend;
+let districtBorders, unitBorders;
+
+// Definice barevných škál
+const paletteMap = {
+  all: chroma.scale('RdYlGn').mode('lab'),
+  f: chroma.scale('BrBG').mode('lab'),
+  p: chroma.scale('PuOr').mode('lab'),
+  s: chroma.scale('PiYG').mode('lab')
+};
+
+const scoreTypes = {
+  "Grid Score All": ["entropy_data/entropy_scores_wgs84.geojson", "scores_x.all.ln", "grid"],
+  "Grid Score F":   ["entropy_data/entropy_scores_wgs84.geojson", "scores_x.f.E.ln", "grid"],
+  "Grid Score P":   ["entropy_data/entropy_scores_wgs84.geojson", "scores_x.p.E.ln", "grid"],
+  "Grid Score S":   ["entropy_data/entropy_scores_wgs84.geojson", "scores_x.s.E.ln", "grid"],
+  "District Score All": ["entropy_data/entropy_scores_city_districts.geojson", "scores_x.all.ln", "district"],
+  "District Score F":   ["entropy_data/entropy_scores_city_districts.geojson", "scores_x.f.E.ln", "district"],
+  "District Score P":   ["entropy_data/entropy_scores_city_districts.geojson", "scores_x.p.E.ln", "district"],
+  "District Score S":   ["entropy_data/entropy_scores_city_districts.geojson", "scores_x.s.E.ln", "district"],
+  "Unit Score All": ["entropy_data/entropy_scores_BSUs.geojson", "scores_x.all.ln", "unit"],
+  "Unit Score F":   ["entropy_data/entropy_scores_BSUs.geojson", "scores_x.f.E.ln", "unit"],
+  "Unit Score P":   ["entropy_data/entropy_scores_BSUs.geojson", "scores_x.p.E.ln", "unit"],
+  "Unit Score S":   ["entropy_data/entropy_scores_BSUs.geojson", "scores_x.s.E.ln", "unit"]
+};
+
+Object.entries(scoreTypes).forEach(([label, [file, attr, type]]) => {
+  fetch(file)
+    .then(res => res.json())
+    .then(data => {
+      const values = data.features.map(f => f.properties[attr]).filter(v => v != null);
+      const min = Math.min(...values), max = Math.max(...values), mid = (min + max) / 2;
+
+      // Vyber škálu podle typu skóre
+      let palette = 'RdYlGn'; // default
+      if (label.includes("Score F")) palette = 'BrBG';
+      else if (label.includes("Score P")) palette = 'PuOr';
+      else if (label.includes("Score S")) palette = 'PiYG';
+
+      // Lokální barevná škála pro tuto vrstvu
+      const scale = chroma.scale(palette).mode('lab').domain([max, mid, min]);
+
+      const layer = L.geoJSON(data, {
+        style: f => {
+          const val = f.properties[attr];
+          return {
+            fillColor: val != null ? scale(val).hex() : '#A9A9A9',
+            fillOpacity: 0.6,
+            color: "gray",
+            weight: 1
+          };
+        },
+        onEachFeature: (feature, lyr) => {
+          const p = feature.properties;
+          const active = attr;
+          let popup = "";
+
+          if (type === "grid") {
+            popup = `<p class="popup-label"><strong>BUG ID:</strong> ${p.id}</p>
+              <p class="popup-label"><strong>City district:</strong> ${p.scores_MC}</p>
+              <p class="popup-label"><strong>Settlement unit:</strong> ${p.scores_ZSJ}</p>
+              <table class="popup-table">
+                <thead><tr><th></th><th>Cell</th><th>District</th><th>Unit</th></tr></thead>
+                <tbody>` +
+              ['all', 'f', 'p', 's'].map(k => {
+                const fAttr = `scores_x.${k === 'all' ? 'all' : k + '.E'}.ln`;
+                const dAvg = `avg_score_${k}`, uAvg = `avg_zsj_score_${k}`;
+                const tag = (fAttr === active) ? 'strong' : 'span';
+                return `<tr><td><${tag}>Score (${k}):</${tag}></td>
+                          <td><${tag}>${p[fAttr]?.toFixed(2) ?? 'NA'}</${tag}></td>
+                          <td><${tag}>${p[dAvg]?.toFixed(2) ?? 'NA'}</${tag}></td>
+                          <td><${tag}>${p[uAvg]?.toFixed(2) ?? 'NA'}</${tag}></td></tr>`;
+              }).join('') + `</tbody></table>`;
+          }
+
+          else if (type === "district") {
+            popup = `<p class="popup-label"><strong>City district:</strong> ${p.nazev}</p>
+              <table class="popup-table">
+                <thead><tr><th></th><th>District</th></tr></thead>
+                <tbody>` +
+              ['all', 'f', 'p', 's'].map(k => {
+                const fAttr = `scores_x.${k === 'all' ? 'all' : k + '.E'}.ln`;
+                const tag = (fAttr === active) ? 'strong' : 'span';
+                return `<tr><td><${tag}>Score (${k}):</${tag}></td>
+                          <td><${tag}>${p[fAttr]?.toFixed(2) ?? 'NA'}</${tag}></td></tr>`;
+              }).join('') + `</tbody></table>`;
+          }
+
+          else if (type === "unit") {
+            popup = `<p class="popup-label"><strong>Settlement unit:</strong> ${p.nazev}</p>
+              <table class="popup-table">
+                <thead><tr><th></th><th>Unit</th></tr></thead>
+                <tbody>` +
+              ['all', 'f', 'p', 's'].map(k => {
+                const fAttr = `scores_x.${k === 'all' ? 'all' : k + '.E'}.ln`;
+                const tag = (fAttr === active) ? 'strong' : 'span';
+                return `<tr><td><${tag}>Score (${k}):</${tag}></td>
+                          <td><${tag}>${p[fAttr]?.toFixed(2) ?? 'NA'}</${tag}></td></tr>`;
+              }).join('') + `</tbody></table>`;
+          }
+
+          lyr.bindPopup(`<div style="font-family:Arial; font-size:13px;">${popup}</div>`);
+        }
+      });
+
+      // Uložíme vrstvu a její škálu a meze pro legendu
+      layers[label] = { layer, scale, min, mid, max };
+
+      // Aktivujeme výchozí vrstvu a zaškrtneme ji v ovládacím panelu
+      if (label === "Grid Score All") {
+        switchLayer(label);
+        setTimeout(() => {
+          const radio = document.querySelector(`input[name="scoreLayer"][value="${label}"]`);
+          if (radio) radio.checked = true;
+        }, 0);
+      }
+    });
+});
+
+// hranice městských částí (černé linie) – neinteraktivní
+fetch("entropy_data/entropy_scores_city_districts.geojson")
+  .then(res => res.json())
+  .then(data => {
+    districtBorders = L.geoJSON(data, {
+      style: { color: "black", weight: 2, fillOpacity: 0 },
+      interactive: false
+    });
+  });
+
+// hranice základních sídelních jednotek – taky neinteraktivní
+fetch("entropy_data/entropy_scores_BSUs.geojson")
+  .then(res => res.json())
+  .then(data => {
+    unitBorders = L.geoJSON(data, {
+      style: { color: "black", weight: 1, fillOpacity: 0 },
+      interactive: false
+    });
+  });
+
+// ovládací panel
+const control = L.control({ position: 'topright' });
+control.onAdd = function () {
+  const wrapper = L.DomUtil.create('div', 'leaflet-control-wrapper leaflet-control');
+  wrapper.id = 'layerControlWrapper';
+  wrapper.style.background = 'white';
+  wrapper.style.padding = '8px 10px';
+  wrapper.style.fontFamily = 'Arial, sans-serif';
+  wrapper.style.fontSize = '12px';
+  wrapper.style.lineHeight = '1.2';
+
+  const entropyLabels = {
+    "All": "Overall entropy",
+    "F": "Functional entropy",
+    "P": "Physical entropy",
+    "S": "Social entropy"
+  };
+
+  const sections = {
+    "Grid Scores": Object.keys(scoreTypes).filter(l => l.startsWith("Grid")),
+    "District Scores": Object.keys(scoreTypes).filter(l => l.startsWith("District")),
+    "Unit Scores": Object.keys(scoreTypes).filter(l => l.startsWith("Unit"))
+  };
+
+  let first = true;
+  Object.entries(sections).forEach(([title, labels]) => {
+    if (!first) wrapper.innerHTML += `<hr style="margin:6px 0;">`;
+    wrapper.innerHTML += `<div style="margin-top:2px; font-weight:bold;">${title}</div>`;
+    labels.forEach(label => {
+      const short = label.split(" ").slice(-1)[0];
+      const longName = entropyLabels[short];
+      wrapper.innerHTML += `<label style="display:block; margin-left:6px;">
+        <input type="radio" name="scoreLayer" value="${label}" style="vertical-align:middle;"> ${longName}
+      </label>`;
+    });
+    first = false;
+  });
+
+  wrapper.innerHTML += `<hr style="margin:6px 0;">
+    <label style="display:block;"><input type="checkbox" id="toggleDistricts"> City districts</label>
+    <label style="display:block;"><input type="checkbox" id="toggleUnits"> Basic settlement units</label>`;
+
+  return wrapper;
+};
+control.addTo(map);
+
+// 📱 Po přidání panelu schovej na mobilu
+setTimeout(() => {
+  if (window.innerWidth < 768) {
+    const panel = document.getElementById('layerControlWrapper');
+    const button = document.getElementById('showPanel');
+    if (panel && button) {
+      panel.classList.add('collapsed');
+      button.style.display = 'block';
+    }
+  }
+}, 0);
+
+const showPanelBtn = document.createElement("button");
+showPanelBtn.id = "showPanel";
+showPanelBtn.innerText = "☰";
+document.body.appendChild(showPanelBtn);
+
+// interakce
+document.addEventListener("change", e => {
+  if (e.target.name === "scoreLayer") {
+    switchLayer(e.target.value);
+
+    // 📱 Automatické sbalení ovládacího panelu na mobilu
+    if (window.innerWidth < 768) {
+const panel = document.getElementById('layerControlWrapper');
+      const button = document.getElementById('showPanel');
+      if (panel && button) {
+        panel.classList.add('collapsed');
+        button.style.display = 'block';
+      }
+    }
+  }
+
+  if (e.target.id === "toggleDistricts") {
+    e.target.checked ? districtBorders.addTo(map) : map.removeLayer(districtBorders);
+  }
+
+  if (e.target.id === "toggleUnits") {
+    e.target.checked ? unitBorders.addTo(map) : map.removeLayer(unitBorders);
+  }
+});
+
+// legenda
+function switchLayer(label) {
+  Object.values(layers).forEach(l => map.removeLayer(l.layer));
+  if (legend) map.removeControl(legend);
+
+  const { layer, scale, min, mid, max } = layers[label];
+  map.addLayer(layer);
+
+  const hasNA = label.startsWith("Unit");
+legend = L.control({ position: 'bottomright' });
+legend.onAdd = function () {
+  const div = L.DomUtil.create('div', 'legend');
+
+  const hasZero = min <= 0 && max >= 0;
+
+  const legendHeight = window.innerHeight < 500 ? 80 : 120; // Dynamická výška legendy
+  const zeroRatio = (0 - min) / (max - min);
+  const zeroOffset = (1 - zeroRatio) * legendHeight;
+
+  const gradient = `linear-gradient(to top, ${scale(min).hex()} 0%, ${scale(mid).hex()} 50%, ${scale(max).hex()} 100%)`;
+
+  div.innerHTML = `
+    <strong style="font-family: Arial; font-size: 13px;">${label}</strong><br>
+    <div style="display: flex; align-items: flex-start;">
+      <div style="position: relative; width: 20px; height: ${legendHeight}px; background: ${gradient}; border: 1px solid #aaa; margin-right: 6px;">
+        ${hasZero ? `
+          <div style="
+            position: absolute;
+            left: 0;
+            width: 100%;
+            top: ${zeroOffset}px;
+            height: 1px;
+            background: black;"></div>` : ``}
+      </div>
+      <div style="position: relative; font-size: 11px; font-family: Arial; height: ${legendHeight}px; width: 24px;">
+        <div style="position: absolute; top: 0; left: 0; text-align: left;">${Math.round(max)}</div>
+        ${hasZero ? `<div style="position: absolute; top: ${zeroOffset - 6}px; left: 0; text-align: left;">0</div>` : ``}
+        <div style="position: absolute; bottom: 0; left: 0; text-align: left;">${Math.round(min)}</div>
+      </div>
+    </div>` +
+
+    (label.startsWith("Unit") ? `
+      <div style="margin-top: 8px;">
+        <div style="width: 20px; height: 12px; background: #A9A9A9; display: inline-block; margin-right: 4px;"></div> NA
+      </div>` : ``);
+
+  return div;
+};  legend.addTo(map);
+
+document.addEventListener("click", e => {
+  if (e.target.id === "showPanel") {
+    const panel = document.getElementById('layerControlWrapper');
+    e.target.style.display = "none";
+    if (panel) panel.classList.remove('collapsed');
+  }
+});
+// 📱 Na mobilu rovnou schovat ovládací panel po načtení
+window.addEventListener('load', () => {
+  if (window.innerWidth < 768) {
+    const panel = document.getElementById('layerControlWrapper');
+    const button = document.getElementById('showPanel');
+    if (panel && button) {
+      panel.classList.add('collapsed');
+      button.style.display = 'block';
+    }
+  }
+});
+}
+</script>
+</body>
+</html>
