@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>STRECITY – Layers Data Sources</title>
+  <title>STRECITY – Layer Data Sources</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -38,10 +38,18 @@
     tr:nth-child(even) {
       background-color: #f2f2f2;
     }
+
+    .note {
+      font-size: 13px;
+      font-style: italic;
+      color: #555;
+      margin-top: -20px;
+      margin-bottom: 30px;
+    }
   </style>
 </head>
 <body>
-  <h1>Layer Data Sources</h1>
+  <h1>Layers Data Sources</h1>
   <table>
     <thead>
       <tr>
@@ -85,5 +93,9 @@
       <tr><td>Social</td><td>Usual residents</td><td>Number of usual residents per cell</td><td>Brno Urban Grid; Czech Statistical Office</td></tr>
     </tbody>
   </table>
+
+  <p class="note">
+    Administrative unit boundaries are sourced from the RÚIAN database (ČÚZK). The grid structure follows the same system as used in the <a href="https://brnourbangrid.cz/" target="_blank">Brno Urban Grid project</a>.
+  </p>
 </body>
 </html>
